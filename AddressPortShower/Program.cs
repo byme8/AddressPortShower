@@ -39,6 +39,7 @@ namespace AddressPortShower
 				var bytes = Encoding.UTF8.GetBytes(message);
 
 				udpClient.SendAsync(bytes, bytes.Length, request.RemoteEndPoint);
+				Console.WriteLine($"Request from: {request.RemoteEndPoint.Address.ToString()}:{request.RemoteEndPoint.Port}");
 			}
 		}
 	}
