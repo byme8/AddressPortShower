@@ -1,25 +1,15 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using UdpMessageSender;
 
 namespace AddressPortShower
 {
 	class Program
 	{
-		class DeviceAddress
-		{
-			public DeviceAddress(IPEndPoint endPoint)
-			{
-				this.Address = endPoint.Address.ToString();
-				this.Port = endPoint.Port;
-			}
-
-			public int Port { get; private set; }
-			public string Address { get; private set; }
-		}
-
 		static void Main(string[] args)
 		{
 			Launch();
@@ -28,19 +18,17 @@ namespace AddressPortShower
 
 		private static async void Launch()
 		{
-			var udpClient = new UdpClient(5000);
+			var udpMessager = new UdpMessager(5000);
 
-			while (true)
-			{
-				var request = await udpClient.ReceiveAsync();
-				var message = JsonConvert.SerializeObject(
-					new DeviceAddress(request.RemoteEndPoint));
-
-				var bytes = Encoding.UTF8.GetBytes(message);
-
-				udpClient.SendAsync(bytes, bytes.Length, request.RemoteEndPoint);
-				Console.WriteLine($"Request from: {request.RemoteEndPoint.Address.ToString()}:{request.RemoteEndPoint.Port}");
-			}
+			udpMessager.Messages.
+				OfType<CurrentAddressRequest>().
+				Subscribe(async message =>
+				{
+					await udpMessager.SendMessageAsync(
+						new CurrentAddressResponce(), 
+						message.FromAddress, 
+						message.FromPort);
+				});
 		}
 	}
 }
