@@ -18,7 +18,8 @@ namespace UdpMessageSender
 
 		private static JsonSerializerSettings Settings = new JsonSerializerSettings
 		{
-			TypeNameHandling = TypeNameHandling.All
+			TypeNameHandling = TypeNameHandling.All,
+			Formatting = Formatting.Indented
 		};
 		private Subject<UdpMessage> messages;
 
@@ -53,6 +54,7 @@ namespace UdpMessageSender
 					message.FromAddress = request.RemoteEndPoint.Address.ToString();
 					message.FromPort = request.RemoteEndPoint.Port;
 
+					Console.WriteLine("Recieve: \n" + json);
 					this.messages.OnNext(message);
 				}
 				catch (Exception ex)
@@ -70,6 +72,8 @@ namespace UdpMessageSender
 			var bytes = Encoding.UTF8.GetBytes(json);
 
 			await this.UdpClient.SendAsync(bytes, bytes.Length, host, port);
+
+			Console.WriteLine("Send: \n" + json);
 		}
 
 		public void Dispose()
