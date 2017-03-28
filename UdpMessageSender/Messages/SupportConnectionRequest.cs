@@ -12,5 +12,7 @@ namespace UdpMessageSender
 
 		public int TargetPort { get; private set; }
 		public string TargetAddress { get; private set; }
+		public int TargetFromPort { get; set; }
+		public string TargetFromAddress { get; set; }
 	}
 }

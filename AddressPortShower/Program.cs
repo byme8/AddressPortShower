@@ -25,9 +25,25 @@ namespace AddressPortShower
 				Subscribe(async message =>
 				{
 					await udpMessager.SendMessageAsync(
-						new CurrentAddressResponce(), 
-						message.FromAddress, 
+						new CurrentAddressResponce(),
+						message.FromAddress,
 						message.FromPort);
+				});
+
+			udpMessager.Messages.
+				OfType<SupportConnectionRequest>().
+				Subscribe(async message =>
+				{
+					message.TargetFromAddress = message.FromAddress;
+					message.TargetFromPort = message.FromPort;
+					await udpMessager.SendMessageAsync(message, message.TargetAddress, message.TargetPort);
+				});
+
+			udpMessager.Messages.
+				OfType<SupportConnectionRequestSent>().
+				Subscribe(async message =>
+				{
+					await udpMessager.SendMessageAsync(message, message.TargetAddress, message.TargetPort);
 				});
 		}
 	}
